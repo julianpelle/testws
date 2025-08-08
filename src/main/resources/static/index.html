@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Noticias en tiempo real</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2/dist/stomp.min.js"></script>
+</head>
+<body>
+<h1>Noticias en tiempo real</h1>
+<ul id="newsList"></ul>
+
+<script>
+    const newsList = document.getElementById("newsList");
+
+    function addNews(news) {
+        let li = document.createElement("li");
+        li.textContent = `${news.titulo} - ${news.descripcion}`;
+        newsList.appendChild(li);
+    }
+
+    console.log('Cargando noticias iniciales...');
+
+    fetch('http://localhost:8080/api/news')
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(news => addNews(news));
+        })
+        .catch(err => console.error('Error cargando noticias iniciales:', err));
+
+    console.log('Conectando al WebSocket...');
+    let socket = new SockJS('http://localhost:8080/ws');
+    let stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+        console.log('Conectado: ' + frame);
+        stompClient.subscribe('/topic/news', function (message) {
+            try {
+                let news = JSON.parse(message.body);
+                console.log('Nueva noticia recibida:', news);
+                addNews(news);
+            } catch (e) {
+                console.error("Error parseando mensaje:", message.body, e);
+            }
+        });
+    }, function (error) {
+        console.error('Error al conectar STOMP:', error);
+    });
+</script>
+</body>
+</html>
