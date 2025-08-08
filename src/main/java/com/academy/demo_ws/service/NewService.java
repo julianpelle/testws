@@ -38,7 +38,7 @@ public class NewService {
 
         NewEntity saved = newRepository.save(newEntity);
 
-        // Notificar en tiempo real con el objeto completo
+        //Notificar en tiempo real con el objeto completo
         notificationService.notifyNewEvent(String.valueOf(saved));
 
         return saved;

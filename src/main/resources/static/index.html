@@ -3,7 +3,9 @@
 <head>
     <title>Noticias en tiempo real</title>
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/stompjs@2/dist/stomp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.1.1/bundles/stomp.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
+
 </head>
 <body>
 <h1>Noticias en tiempo real</h1>
@@ -19,7 +21,6 @@
     }
 
     console.log('Cargando noticias iniciales...');
-
     fetch('http://localhost:8080/api/news')
         .then(response => response.json())
         .then(data => {
@@ -28,23 +29,30 @@
         .catch(err => console.error('Error cargando noticias iniciales:', err));
 
     console.log('Conectando al WebSocket...');
-    let socket = new SockJS('http://localhost:8080/ws');
-    let stompClient = Stomp.over(socket);
 
-    stompClient.connect({}, function (frame) {
-        console.log('Conectado: ' + frame);
-        stompClient.subscribe('/topic/news', function (message) {
+    const stompClient = new StompJs.Client({
+        webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+        debug: (str) => console.log(str)
+    });
+
+    stompClient.onConnect = (frame) => {
+        console.log('✅ Conectado a STOMP: ' + frame);
+        stompClient.subscribe('/topic/news', (message) => {
             try {
                 let news = JSON.parse(message.body);
-                console.log('Nueva noticia recibida:', news);
+                console.log("📩 Nueva noticia:", news);
                 addNews(news);
             } catch (e) {
                 console.error("Error parseando mensaje:", message.body, e);
             }
         });
-    }, function (error) {
-        console.error('Error al conectar STOMP:', error);
-    });
+    };
+
+    stompClient.onStompError = (frame) => {
+        console.error('❌ Error en STOMP:', frame);
+    };
+
+    stompClient.activate();
 </script>
 </body>
 </html>
