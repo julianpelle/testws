@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Noticias en tiempo real</title>
+    <title>Pagina principal</title>
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.1.1/bundles/stomp.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
@@ -14,13 +14,11 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.7);
-            display: none; /* Oculto por defecto */
+            display: none;
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
-
-        /* Estilos para el cartel de la notificación */
         #notification-popup {
             background-color: #333;
             color: white;
@@ -28,11 +26,8 @@
             border-radius: 10px;
             text-align: center;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            position: relative;
         }
-
-        /* Estilos para el botón de cerrar */
-        #close-button {
+        #go-to-news-button {
             margin-top: 20px;
             padding: 10px 20px;
             cursor: pointer;
@@ -42,81 +37,44 @@
             border-radius: 5px;
             font-size: 16px;
         }
-
-        #close-button:hover {
-            background-color: #45a049;
-        }
     </style>
 </head>
 <body>
-<h1>Noticias en tiempo real</h1>
-<ul id="newsList"></ul>
+<h1>Bienvenido a la pagina principal</h1>
+<p>Navega a las <a href="news.html">Novedades en tiempo real</a></p>
 
 <div id="notification-overlay">
     <div id="notification-popup">
-        <h2>Hay una nueva novedad!!! </h2>
-        <button id="close-button">Ver novedad</button>
+        <h2>Hay una nueva novedad!!!</h2>
+        <button id="go-to-news-button">Ver novedad</button>
     </div>
 </div>
 
 <script>
-    const newsList = document.getElementById("newsList");
     const notificationOverlay = document.getElementById("notification-overlay");
-    const closeButton = document.getElementById("close-button");
-    let pendingNews; // Variable para guardar la noticia
+    const goToNewsButton = document.getElementById("go-to-news-button");
 
-    function addNews(news) {
-        let li = document.createElement("li");
-        li.textContent = `${news.titulo} - ${news.descripcion}`;
-        newsList.appendChild(li);
-    }
-
-    function showNotification(news) {
-        pendingNews = news; // Guarda la noticia
+    // Función para mostrar el cartel
+    function showNotification() {
         notificationOverlay.style.display = 'flex';
     }
 
-    // Evento para el botón de cerrar
-    closeButton.addEventListener('click', () => {
-        notificationOverlay.style.display = 'none'; // Oculta el cartel
-        if (pendingNews) {
-            addNews(pendingNews); // Actualiza la lista
-            pendingNews = null; // Limpia la variable
-        }
+    // Al hacer clic en el botón, te lleva a news.html
+    goToNewsButton.addEventListener('click', () => {
+        window.location.href = 'news.html';
     });
 
-    console.log('Cargando noticias iniciales...');
-    fetch('http://localhost:8080/api/news')
-        .then(response => response.json())
-        .then(data => {
-            data.forEach(news => addNews(news));
-        })
-        .catch(err => console.error('Error cargando noticias iniciales:', err));
-
-    console.log('Conectando al WebSocket...');
-
+    // Conexión al WebSocket
     const stompClient = new StompJs.Client({
-        webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
-        debug: (str) => console.log(str)
+        webSocketFactory: () => new SockJS('http://localhost:8080/ws')
     });
 
     stompClient.onConnect = (frame) => {
-        console.log('✅ Conectado a STOMP: ' + frame);
         stompClient.subscribe('/topic/news', (message) => {
-            try {
-                let news = JSON.parse(message.body);
-                console.log("📩 Nueva noticia:", news);
-                showNotification(news); // Muestra el cartel, no actualiza la lista
-            } catch (e) {
-                console.error("Error parseando mensaje:", message.body, e);
-            }
+            // Cuando llega un mensaje, muestra el cartel
+            showNotification();
         });
     };
-
-    stompClient.onStompError = (frame) => {
-        console.error('❌ Error en STOMP:', frame);
-    };
-
     stompClient.activate();
 </script>
 </body>

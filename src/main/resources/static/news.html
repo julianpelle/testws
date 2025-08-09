@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Novedades en tiempo real</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.1.1/bundles/stomp.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
+</head>
+<body>
+<h1>Novedades en tiempo real</h1>
+<p>Volver a la <a href="index.html">Pagina principal</a></p>
+<ul id="newsList"></ul>
+
+<script>
+    const newsList = document.getElementById("newsList");
+
+    function addNews(news) {
+        let li = document.createElement("li");
+        li.textContent = `${news.titulo} - ${news.descripcion}`;
+        newsList.appendChild(li);
+    }
+
+    // Cargar noticias iniciales
+    fetch('http://localhost:8080/api/news')
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(news => addNews(news));
+        })
+        .catch(err => console.error('Error cargando noticias iniciales:', err));
+
+    // Conexión al WebSocket
+    const stompClient = new StompJs.Client({
+        webSocketFactory: () => new SockJS('http://localhost:8080/ws')
+    });
+
+    stompClient.onConnect = (frame) => {
+        stompClient.subscribe('/topic/news', (message) => {
+            try {
+                let news = JSON.parse(message.body);
+                // Cuando llega un mensaje, actualiza la lista directamente
+                addNews(news);
+            } catch (e) {
+                console.error("Error parseando mensaje:", message.body, e);
+            }
+        });
+    };
+    stompClient.activate();
+</script>
+</body>
+</html>
