@@ -9,12 +9,12 @@ import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
 import java.io.InputStream;
+
 @Configuration
 public class FirebaseConfig {
 
         @Bean
         public FirebaseApp firebaseApp() throws IOException {
-            //InputStream serviceAccount = new ClassPathResource("firebase-adminsdk.json").getInputStream();
 
             InputStream serviceAccount = null;
             try {
@@ -27,8 +27,6 @@ public class FirebaseConfig {
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .build();
-
-            System.out.println("Firebase Admin SDK inicializado con éxito.");
 
             return FirebaseApp.initializeApp(options);
         }

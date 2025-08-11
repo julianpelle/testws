@@ -1,69 +1,120 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Firebase Push Notifications</title>
-</head>
-<body>
-<h1>Notificaciones Push</h1>
-<p>Haz clic para habilitar las notificaciones:</p>
-<button onclick="requestPermission()">Habilitar Notificaciones</button>
-<p id="token-message"></p>
-
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
-
-<script>
+    <head>
+    <title>Firebase Push Notifications</title>
+    </head>
+    <body>
+    <h1>Notificaciones Push</h1>
+    <p>Haz clic para habilitar las notificaciones:</p>
+    <button onclick="requestPermission()">Habilitar Notificaciones</button>
+    <p id="token-message"></p>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
+    <script>
         const firebaseConfig = {
         apiKey: "AIzaSyAI1X_qa4kCPwrLxOC1Z0FbWpeMsyFpevQ",
+
         authDomain: "webpush-8acca.firebaseapp.com",
+
         projectId: "webpush-8acca",
+
         storageBucket: "webpush-8acca.firebasestorage.app",
+
         messagingSenderId: "759868464205",
+
         appId: "1:759868464205:web:4f1c6da4d699b55a661004",
+
         measurementId: "G-7E0NRCH0KR"
+
         };
 
+
+
         firebase.initializeApp(firebaseConfig);
+
         const messaging = firebase.messaging();
 
+
+
         function requestPermission() {
-            console.log('Requesting permission...');
-            messaging.requestPermission().then(() => {
-                console.log('Notification permission granted.');
-                getToken();
-            }).catch((err) => {
-                console.error('Unable to get permission to notify.', err);
-            });
+
+        console.log('Requesting permission...');
+
+        messaging.requestPermission().then(() => {
+
+        console.log('Notification permission granted.');
+
+        getToken();
+
+        }).catch((err) => {
+
+        console.error('Unable to get permission to notify.', err);
+
+        });
+
         }
+
+
 
         function getToken() {
-            messaging.getToken().then((token) => {
-                console.log('FCM Token:', token);
-                document.getElementById("token-message").textContent = "Token recibido: " + token;
-                // 2. Envía el token a tu backend de Spring Boot
-                sendTokenToBackend(token);
-            }).catch((err) => {
-                console.error('An error occurred while retrieving token. ', err);
-            });
+
+        messaging.getToken().then((token) => {
+
+        console.log('FCM Token:', token);
+
+        document.getElementById("token-message").textContent = "Token recibido: " + token;
+
+        // 2. Envía el token a tu backend de Spring Boot
+
+        sendTokenToBackend(token);
+
+        }).catch((err) => {
+
+        console.error('An error occurred while retrieving token. ', err);
+
+        });
+
         }
 
+
+
         function sendTokenToBackend(token) {
-            fetch('http://localhost:8080/api/fcm/token', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ token: token })
-            }).then(response => {
-                if (response.ok) {
-                    console.log('Token enviado al backend con éxito.');
-                } else {
-                    console.error('Error enviando el token al backend.');
-                }
-            }).catch(error => {
-                console.error('Error de red:', error);
-            });
+
+        fetch('http://localhost:8080/api/fcm/token', {
+
+        method: 'POST',
+
+        headers: {
+
+        'Content-Type': 'application/json'
+
+        },
+
+        body: JSON.stringify({ token: token })
+
+        }).then(response => {
+
+        if (response.ok) {
+
+        console.log('Token enviado al backend con éxito.');
+
+        } else {
+
+        console.error('Error enviando el token al backend.');
+
         }
-    </script>
-</body>
+
+        }).catch(error => {
+
+        console.error('Error de red:', error);
+
+        });
+
+        }
+
+
+        </script>
+
+        </body>
+
 </html>

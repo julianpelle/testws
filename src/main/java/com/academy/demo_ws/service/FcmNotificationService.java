@@ -5,7 +5,6 @@ import com.academy.demo_ws.repository.FcmTokenRepository;
 import org.springframework.stereotype.Service;
 import com.google.firebase.messaging.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class FcmNotificationService {
@@ -19,26 +18,36 @@ public class FcmNotificationService {
     public void sendPushNotification(String title, String body) {
         List<String> tokens = fcmTokenRepository.findAll().stream()
                 .map(FcmToken::getToken)
-                .collect(Collectors.toList());
+                .toList();
 
         if (tokens.isEmpty()) {
             System.out.println("No hay tokens registrados para enviar la notificación.");
             return;
         }
 
-        System.out.println("Tokns encontrados: " + tokens.size());
+        System.out.println("Tokens encontrados: " + tokens.size());
 
-        MulticastMessage message = MulticastMessage.builder()
-                .setNotification(Notification.builder().setTitle(title).setBody(body).build())
-                .addAllTokens(tokens)
-                .build();
+        for (String token : tokens) {
+            Message message = Message.builder()
+                    .setNotification(Notification.builder()
+                            .setTitle(title)
+                            .setBody(body)
+                            .build())
+                    .setToken(token)
+                    .build();
 
-        try {
-            FirebaseMessaging.getInstance().sendMulticast(message);
-            System.out.println("Notificación push enviada con éxito.");
-        } catch (FirebaseMessagingException e) {
-            e.printStackTrace();
+            try {
+                String response = FirebaseMessaging.getInstance().send(message);
+                System.out.println("Notificación push enviada a token " + token + ": " + response);
+            } catch (FirebaseMessagingException e) {
+                if (e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) { //puede pasar que haya token viejo que ya no es válido, entonces se controla esto
+                    System.err.println("Token no válido o no registrado. Eliminando de la base de datos: " + token);
+                    fcmTokenRepository.deleteByToken(token);
+                } else {
+                    System.err.println("Error al enviar la notificación a token " + token + ": " + e.getMessage());
+                    e.printStackTrace();
+            }
+        }
         }
     }
 }
-

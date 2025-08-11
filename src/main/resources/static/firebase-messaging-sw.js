@@ -26,3 +26,28 @@ messaging.onBackgroundMessage((payload) => {
 
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
+// Escucha el evento de clic en la notificación
+self.addEventListener('notificationclick', (event) => {
+    // Cierra la notificación
+    event.notification.close();
+
+    // Reemplaza 'index.html' con la URL a la que quieras redirigir.
+    const urlToOpen = 'http://localhost:8080/news.html';
+
+    event.waitUntil(
+        clients.matchAll({
+            type: 'window'
+        }).then((clientList) => {
+            for (const client of clientList) {
+                // Si la página ya está abierta, la enfoca y la redirige.
+                if (client.url.includes('localhost:8080')) {
+                    return client.focus().then(() => client.navigate(urlToOpen));
+                }
+            }
+            // Si la página no está abierta, abre una nueva pestaña y la redirige.
+            if (clients.openWindow) {
+                return clients.openWindow(urlToOpen);
+            }
+        })
+    );
+});
