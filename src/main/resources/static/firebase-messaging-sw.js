@@ -2,30 +2,36 @@ importScripts('https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js');
 importScripts('https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js');
 
 const firebaseConfig = {
-        apiKey: "AIzaSyAI1X_qa4kCPwrLxOC1Z0FbWpeMsyFpevQ",
-        authDomain: "webpush-8acca.firebaseapp.com",
-        projectId: "webpush-8acca",
-        storageBucket: "webpush-8acca.firebasestorage.app",
-        messagingSenderId: "759868464205",
-        appId: "1:759868464205:web:4f1c6da4d699b55a661004",
-        measurementId: "G-7E0NRCH0KR"
-        };
+    apiKey: "AIzaSyAu_AY9yvhGoXWA5rXi9H0--n2Qt5IHFUE",
+    authDomain: "webpush-af9d0.firebaseapp.com",
+    projectId: "webpush-af9d0",
+    storageBucket: "webpush-af9d0.firebasestorage.app",
+    messagingSenderId: "729290736609",
+    appId: "1:729290736609:web:d846bede609acba0a408a0",
+    measurementId: "G-D618KM6ZBP"
+};
+
 
 firebase.initializeApp(firebaseConfig);
 
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-  console.log('[firebase-messaging-sw.js] Received background message ', payload);
-  // Customize notification here
-  const notificationTitle = payload.notification.title;
-  const notificationOptions = {
-    body: payload.notification.body,
-    icon: '/firebase-logo.png' // Opcional: añade un icono
-  };
+    // Si el payload trae notification, dejá que FCM la muestre (no hagas nada)
+    if (payload.notification) {
+        console.log('[sw] bg message con notification: FCM la muestra solo');
+        return;
+    }
 
-  self.registration.showNotification(notificationTitle, notificationOptions);
+    // Solo si viene data, la mostrás manual
+    const notificationTitle = payload.data?.title ?? 'Notificación';
+    const notificationOptions = {
+        body: payload.data?.body ?? '',
+        icon: '/firebase-logo.png'
+    };
+    self.registration.showNotification(notificationTitle, notificationOptions);
 });
+
 // Escucha el evento de clic en la notificación
 self.addEventListener('notificationclick', (event) => {
     // Cierra la notificación
