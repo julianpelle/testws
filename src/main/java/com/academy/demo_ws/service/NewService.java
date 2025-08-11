@@ -13,11 +13,13 @@ public class NewService {
 
     private final NewRepository newRepository;
     private final NotificationService notificationService;
+    private final FcmNotificationService fcmNotificationService;
 
     @Autowired
-    public NewService(NewRepository newRepository, NotificationService notificationService) {
+    public NewService(NewRepository newRepository, NotificationService notificationService,FcmNotificationService fcmNotificationService) {
         this.newRepository = newRepository;
         this.notificationService = notificationService;
+        this.fcmNotificationService = fcmNotificationService;
     }
 
     public List<NewEntity> getAll() {
@@ -40,6 +42,7 @@ public class NewService {
 
         //Notificar en tiempo real con el objeto completo
         notificationService.notifyNewEvent(String.valueOf(saved));
+        fcmNotificationService.sendPushNotification("¡Nueva Novedad!", saved.getTitulo());
 
         return saved;
     }

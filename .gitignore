@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+src/main/resources/firebase-adminsdk.json
+#Mas
+package-lock.json
+package.json
+node_modules
