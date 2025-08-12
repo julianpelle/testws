@@ -1,11 +1,9 @@
 package com.academy.demo_ws.service;
 
-import com.academy.demo_ws.entity.NewEntity;
 import com.academy.demo_ws.model.New;
 import com.academy.demo_ws.repository.NewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -22,27 +20,27 @@ public class NewService {
         this.fcmNotificationService = fcmNotificationService;
     }
 
-    public List<NewEntity> getAll() {
+    public List<New> getAll() {
         return newRepository.findAll();
     }
 
-    public NewEntity getById(Long id) {
+    public New getById(Long id) {
         return newRepository.findById(id).orElse(null);
     }
 
-    public NewEntity save(New news) {
-        NewEntity newEntity = new NewEntity();
-        newEntity.setId(news.getId());
-        newEntity.setActivo(news.isActivo());
-        newEntity.setDescripcion(news.getDescripcion());
-        newEntity.setTitulo(news.getTitulo());
-        newEntity.setPrioridad(news.getPrioridad());
+    public New save(New news) {
+        New newAdded = new New();
+        newAdded.setId(news.getId());
+        newAdded.setActivo(news.isActivo());
+        newAdded.setDescripcion(news.getDescripcion());
+        newAdded.setTitulo(news.getTitulo());
+        newAdded.setPrioridad(news.getPrioridad());
 
-        NewEntity saved = newRepository.save(newEntity);
+        New saved = newRepository.save(newAdded);
 
         //Notificar en tiempo real con el objeto completo
-        notificationService.notifyNewEvent(String.valueOf(saved));
-        fcmNotificationService.sendPushNotification("¡Nueva Novedad!", saved.getTitulo());
+        notificationService.notifyNewEvent(String.valueOf(saved)); //Para WebSocket
+        fcmNotificationService.sendPushNotification("¡Nueva Novedad!", saved.getTitulo()); //Para WebPush
 
         return saved;
     }

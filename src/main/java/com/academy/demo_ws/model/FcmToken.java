@@ -1,6 +1,12 @@
 package com.academy.demo_ws.model;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "tokens")
 public class FcmToken {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String token;
 

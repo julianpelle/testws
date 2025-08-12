@@ -1,13 +1,18 @@
 package com.academy.demo_ws.model;
 
+import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@Entity
+@Table(name = "news")
 @EqualsAndHashCode
 public class New {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private int prioridad;
     private String titulo;

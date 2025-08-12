@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class NotificationService {
 
-   private final SimpMessagingTemplate messagingTemplate;
+   private final SimpMessagingTemplate messagingTemplate; //Herramienta de Spring para enviar mensajes a través de STOMP.
 
     @Autowired
     public NotificationService(SimpMessagingTemplate messagingTemplate) {
@@ -16,6 +16,6 @@ public class NotificationService {
 
     public void notifyNewEvent(String news) {
         // Siempre enviamos un objeto JSON con la noticia completa
-        messagingTemplate.convertAndSend("/topic/news", news);
+        messagingTemplate.convertAndSend("/topic/news", news); //Destino de mensaje
     }
 }

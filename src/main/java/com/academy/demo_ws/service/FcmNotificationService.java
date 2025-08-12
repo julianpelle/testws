@@ -1,11 +1,12 @@
 package com.academy.demo_ws.service;
 
-import com.academy.demo_ws.entity.FcmToken;
+import com.academy.demo_ws.model.FcmToken;
 import com.academy.demo_ws.repository.FcmTokenRepository;
 import org.springframework.stereotype.Service;
 import com.google.firebase.messaging.*;
 import java.util.List;
 
+//Clase Service que contiene la lógica de negocio principal de la aplicación.
 @Service
 public class FcmNotificationService {
 
@@ -15,7 +16,7 @@ public class FcmNotificationService {
         this.fcmTokenRepository = fcmTokenRepository;
     }
 
-    public void sendPushNotification(String title, String body) {
+    public void sendPushNotification(String title, String body) { //Método encargado de enviar las notificaciones
         List<String> tokens = fcmTokenRepository.findAll().stream()
                 .map(FcmToken::getToken)
                 .toList();
@@ -27,17 +28,17 @@ public class FcmNotificationService {
 
         System.out.println("Tokens encontrados: " + tokens.size());
 
-        for (String token : tokens) {
+        for (String token : tokens) { //Construye el objeto Message, que es el formato que Firebase requiere para las notificaciones
             Message message = Message.builder()
                     .setNotification(Notification.builder()
                             .setTitle(title)
                             .setBody(body)
                             .build())
-                    .setToken(token)
+                    .setToken(token) //Especifica a qué token se debe enviar esta notificación
                     .build();
 
             try {
-                String response = FirebaseMessaging.getInstance().send(message);
+                String response = FirebaseMessaging.getInstance().send(message); //Envía la notificación a través del Firebase
                 System.out.println("Notificación push enviada a token " + token + ": " + response);
             } catch (FirebaseMessagingException e) {
                 if (e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) { //puede pasar que haya token viejo que ya no es válido, entonces se controla esto
